@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Wedding Invitation</title>
+  <link href="https://fonts.cdnfonts.com/css/miama" rel="stylesheet">
+  <script type="module" src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app.esm.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.esm.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.esm.js"></script>
+
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="main-card">
+    <div class="text-content">
+      <img class="background-image" src="https://i.pinimg.com/736x/6b/c5/d9/6bc5d96f48dbf01da9331f962a39f980.jpg" alt="Background Image">
+      <div class="text-container">
+        <p class="fm">YOU'RE JOYFULLY INVITED</p>
+        <p class="fm">TO THE WEDDING OF</p>
+        <p class="fs"><span class="Bride"></span> and</p>
+        <p class="fs"><span class="Groom"></span></p>
+        <p>AT THE CELEBRATION OF THEIR WEDDING</p>
+        <p><span class="Day"></span> | <span class="Month"></span> | <span class="Date"></span> | <span class="Year"></span></p>
+        <p>At <span class="start-time"></span> - <span class="end-time"></span></p>
+        <p>Place</p>
+        <p><span class="location"></span></p>
+
+        <button class="huge-btn" onclick="openRSVPModal()">RSVP</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RSVP Modal -->
+  <form id="guestRSVPForm" style="display:none;">
+    <div class="modal-content">
+      <span class="close" onclick="closeRSVPModal()">&times;</span>
+      <h2>RSVP</h2>
+      <p>Please enter your name:</p>
+      <input type="text" id="guestName" placeholder="Your Name" required>
+      <button onclick="submitGuestRSVP()">Confirm RSVP</button>
+    </div>
+  </div>
+
+    <!-- RSVP Modal -->
+    <form id="guestRSVPForm" style="display:none;">
+      <div class="modal-content">
+        <span class="close" onclick="closeRSVPModal()">&times;</span>
+        <h2>RSVP</h2>
+        <p>Please enter your name:</p>
+        <input type="text" id="guestName" placeholder="Your Name" required>
+        <button onclick="submitGuestRSVP()">Confirm RSVP</button>
+      </div>
+    </div>
+  
+    <script>
+      // Function to open the RSVP modal
+      function openRSVPModal() {
+        // Show the guest RSVP form
+        const guestRSVPForm = document.getElementById('guestRSVPForm');
+        guestRSVPForm.style.display = 'block';
+  
+        // Hide the main RSVP button
+        const mainRSVPButton = document.querySelector('.huge-btn');
+        mainRSVPButton.style.display = 'none';
+      }
+  
+      // Function to submit the guest RSVP
+      function submitGuestRSVP() {
+        const guestName = document.getElementById('guestName').value;
+        if (guestName) {
+          // Send the RSVP confirmation to the event manager
+          const managerEmail = 'eventmanager@example.com'; // Replace with the actual manager's email
+          const confirmationMessage = `${guestName} has confirmed their RSVP for the event.`;
+  
+          // You should implement your email sending logic here
+          sendConfirmationEmail(managerEmail, confirmationMessage);
+  
+          alert(`Thank you, ${guestName}, for your RSVP!`);
+          closeRSVPModal();
+        } else {
+          alert('Please enter your name before confirming your RSVP.');
+        }
+      }
+  
+      // Function to close the RSVP modal
+      function closeRSVPModal() {
+        const guestRSVPForm = document.getElementById('guestRSVPForm');
+        guestRSVPForm.style.display = 'none';
+  
+        const mainRSVPButton = document.querySelector('.huge-btn');
+        mainRSVPButton.style.display = 'block';
+      }
+      
+    document.addEventListener('DOMContentLoaded', function() {
+      // Extract query parameters from the URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const bride = urlParams.get('bride');
+      const groom = urlParams.get('groom');
+      const day = urlParams.get('day');
+      const month = urlParams.get('month');
+      const date = urlParams.get('date');
+      const year = urlParams.get('year');
+      const startTime = urlParams.get('start-time');
+      const endTime = urlParams.get('end-time');
+      const location = urlParams.get('location');
+  
+      // Set the extracted values in the wedding invitation page
+      document.querySelector('.Bride').textContent = bride;
+      document.querySelector('.Groom').textContent = groom;
+      document.querySelector('.Day').textContent = day;
+      document.querySelector('.Month').textContent = month;
+      document.querySelector('.Date').textContent = date;
+      document.querySelector('.Year').textContent = year;
+      document.querySelector('.start-time').textContent = startTime;
+      document.querySelector('.end-time').textContent = endTime;
+      document.querySelector('.location').textContent = location;
+    });
+    //Firebase for the RSVP
+    const firebaseConfig = {
+      apiKey: "AIzaSyCdVyG2S7kURLIMzxdzJ6gDaVOnFmqqXY4",
+      authDomain: "baby-shower-invitation-91cce.firebaseapp.com",
+      projectId: "baby-shower-invitation-91cce",
+      storageBucket: "baby-shower-invitation-91cce.appspot.com",
+      messagingSenderId: "113020669171",
+      appId: "1:113020669171:web:c04342930f06e0c672bb86",
+      measurementId: "G-EX6FBX916E"
+    };
+
+    const firebaseApp = firebase.initializeApp(firebaseConfig);
+
+    const nodemailer = require("nodemailer");
+    const admin = require("firebase-admin");
+    admin.initializeApp();
+
+    const transporter = nodemailer.createTransport({
+      service: "Gmail",
+      auth: {
+        user: "synthiacreation.com",
+        pass: "koxa uqcx qhnp pmpa",
+      },
+    });
+
+    exports.sendConfirmationEmail = functions.firestore
+      .document("rsvps/{rsvpId}")
+      .onCreate((snap, context) => {
+        const rsvpData = snap.data();
+
+      // Compose and send the email to the event manager
+        const mailOptions = {
+          from: "synthiacreation.com",
+          to: "event-manager@example.com",
+          subject: "Guest RSVP Confirmation",
+          text: `${rsvpData.guestName} has confirmed their RSVP for the event.`,
+        };
+
+      return transporter.sendMail(mailOptions);
+    });
+
+  </script>
+</body>
+</html>
